@@ -6,24 +6,21 @@ endereco = 'https://www.idealista.com/alquiler-viviendas/barcelona-barcelona/'
 scraper = cloudscraper.create_scraper()
 html = scraper.get(endereco).content
 soup1 = BeautifulSoup(html, 'html.parser')
-
 prices = soup1.findAll('span', class_="item-price h2-simulated")
-print(len(prices))
-## abaixo funcionou mas bnao como uma lista, a len do objeto anuncios é 1.
-# anuncios = soup1.find_all('section', class_="items-list")
-anuncios = soup1.find_all('article', class_="items")
-print(len(anuncios))
+anuncios = soup1.find_all('article', class_="item")
+
 for item in anuncios:
+    #Bloco de string com todas as infos por anuncio:
     infos_completas_por_anuncio = item.find('div', class_="item-info-container")
-    print(afunilei.get_text(),'--------------------')
+    # print(infos_completas_por_anuncio.get_text(),'--------------------')
+    # UM A UM:
+    preco = item.find('span', class_="item-price h2-simulated")
+    preco_destrinchado = preco.get_text().split('€')
+    preco_numerico = float(preco_destrinchado[0].replace('.',''))
+    print(preco_numerico)
+    titulo = item.find('div', class_="item-detail-char")
+    print(titulo.get_text())
 
-infos = soup1.findAll('div', class_="item-info-container")
-infos_item = soup1.findAll('a')
-# print(infos_item)
-detalhes = soup1.findAll('div', class_="item-detail-char")
-
-detalhes_txt = detalhes[1].get_text()
-# print(detalhes_txt)
 
 # for index, item in enumerate(infos_item):
 #     a_tag = infos_item[index].find('a')
