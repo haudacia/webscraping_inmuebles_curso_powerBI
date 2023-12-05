@@ -16,10 +16,9 @@ for pagina_1 in webpages_alquiler:
     nome_cidade = variavel_cidade.split('-')[0]
     todas_paginas_cidade = [pagina_1]
 
-    for i in range(quant_paginas):
-        if i >= 2:
-            endereco_completo = pagina_1 + f'pagina-{i}' + fim_endereco
-            todas_paginas_cidade.append(endereco_completo)
+    for i in range(2,quant_paginas):
+        endereco_completo = pagina_1 + f'pagina-{i}' + fim_endereco
+        todas_paginas_cidade.append(endereco_completo)
     conjunto_anuncios_cidades.append(todas_paginas_cidade)
 print(conjunto_anuncios_cidades)
 
