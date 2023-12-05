@@ -2,9 +2,10 @@ import cloudscraper
 from bs4 import BeautifulSoup
 
 endereco = 'https://www.idealista.com/alquiler-viviendas/barcelona-barcelona/'
+endereco_2 = 'https://www.idealista.com/alquiler-viviendas/madrid-madrid/'
 
 scraper = cloudscraper.create_scraper()
-html = scraper.get(endereco).content
+html = scraper.get(endereco_2).content
 soup1 = BeautifulSoup(html, 'html.parser')
 anuncios = soup1.find_all('article', class_="item")
 
@@ -23,23 +24,12 @@ for index, anuncio in enumerate(anuncios, start=1):
     #Bloco de string com todas as infos por anuncio:
     infos_completas_por_anuncio = anuncio.find('div', class_="item-info-container")
     titulo = infos_completas_por_anuncio.find('a', class_="item-link")
-    print(f'{index} - {titulo.get_text().strip()}')
+    print(f'\033[40;33m{index} - {titulo.get_text().strip()}\033[m')
     # UM A UM:
     detalhes = anuncio.find('div', class_="item-detail-char")
     preco = anuncio.find('span', class_="item-price h2-simulated")
     preco_decomp = preco.get_text().split('€')
     preco_numerico = float(preco_decomp[0].replace('.',''))
-    print(f'€ {preco_numerico:.2f}')
+    print(f'\033[33m€ {preco_numerico:.2f}\033[m')
     print(detalhes.get_text().strip())
     dict = {}
-
-# o enumerate funcionando:
-# for index, item in enumerate(anuncios, start=0):
-#     item_texto = anuncios[index].get_text(strip=True, separator='-')
-#     preco = soup1.find('span', class_="item-price h2-simulated")
-#     infos = soup1.find('div', class_="item-info-container")
-#     titulo = soup1.find('title')
-#     # preco_txt = preco.get_text()
-#     # print(item_texto)
-#     print(titulo.get_text(), preco.get_text())
-#     print('----------------------------------------')
