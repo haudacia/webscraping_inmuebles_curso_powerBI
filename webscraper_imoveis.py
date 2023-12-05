@@ -1,6 +1,9 @@
+import os
+
 import cloudscraper
 from bs4 import BeautifulSoup
 import pandas as pd
+from openpyxl.workbook import Workbook
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -36,17 +39,14 @@ print(todos_anuncios)
 d = {'NOME': cidades}
 df = pd.DataFrame(d)
 print(df)
-
-
+dict = {'INDICE':[], 'NOME':[]}
 # Turn all this below into a function so I can use it to any address (in idealista, at least)
 def coletar_dados_organizados(endereco):
     # endereco = input('Insira o endereço completo da página')
-    endereco = endereco
     scraper = cloudscraper.create_scraper()
     html = scraper.get(endereco).content
     soup1 = BeautifulSoup(html, 'html.parser')
     anuncios = soup1.find_all('article', class_="item")
-
     for index, anuncio in enumerate(anuncios, start=1):
         #Bloco de string com todas as infos por anuncio:
         infos_completas_por_anuncio = anuncio.find('div', class_="item-info-container")
@@ -59,29 +59,34 @@ def coletar_dados_organizados(endereco):
         preco_numerico = float(preco_decomp[0].replace('.',''))
         print(f'\033[33m€ {preco_numerico:.2f}\033[m')
         print(detalhes)
-        # dict = {index: [titulo,preco_numerico,detalhes]}
-        # print(dict)
-    print(len(anuncios))
+        dict['INDICE'] = index
+    print(dict)
+    # df_1 = pd.DataFrame(dict)
+    # df_1.to_excel('df_1.xlsx')
+    # os.startfile('df_1.xlsx')
 
+# coletando todas as páginas de todas as cidades.
+for endereco in webpages_alquiler:
+    coletar_dados_organizados(endereco)
 
-# # coletando todas as páginas de todas as cidades.
 # for p in todos_anuncios:
 #     for item in p:
 #         coletar_dados_organizados(item)
+#
+# df.to_excel('test.xlsx', sheet_name=cidades[0])
+# df1 = df.copy()
+# os.startfile('test.xlsx')
+# with pd.ExcelWriter('test.xlsx') as writer:
+#     df.to_excel(writer, sheet_name=cidades[0])
+#     df1.to_excel(writer, sheet_name=cidades[1])
+#     df1.to_excel(writer, sheet_name=cidades[2])
 
-df.to_excel('test.xlsx', sheet_name=nomes_cidades[0])
+
 
 
 # Funçâo para coletar apenas textos dos objetos bs4 (não foi necessária a partir de quando se descobriu o item certo que
 # armazena cada anuncio. A ideia era coletar separadamente as listas de precos, titulos, area e depois referencia-las
 # de novo a seus respectivos anuncios a partir de seus indices em comum.
-
-
-
-
-
-
-
 
 def coletar_textos(soup_iteravel):
     lista_textos = []
