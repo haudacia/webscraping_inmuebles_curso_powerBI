@@ -1,9 +1,21 @@
 import os
+from selenium import webdriver
+
+if os.environ['PATH'].find(';C:\\SeleniumDrivers') > 0:
+    pass
+else:
+  os.environ['PATH'] += ";C:\\SeleniumDrivers"
+
+driver = webdriver.Chrome()
+driver.implicitly_wait(~2) # or another adequate time
+driver.get('https://www.yoursitegoeshere.com')
+
+with open("https://www.idealista.com/alquiler-viviendas/barcelona-barcelona/.html", "w", encoding='utf8') as f:
+    f.write(driver.page_source)
 
 import cloudscraper
 from bs4 import BeautifulSoup
 import pandas as pd
-from openpyxl.workbook import Workbook
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -13,13 +25,12 @@ inicio_endereco_2 = 'https://www.idealista.com/alquiler-viviendas/madrid-madrid/
 inicio_endereco_3 = 'https://www.idealista.com/alquiler-viviendas/cordoba-cordoba/'
 
 webpages_alquiler = [inicio_endereco_1, inicio_endereco_2, inicio_endereco_3]
-quant_paginas = 20 #melhorar
+quant_paginas = 6 #melhorar
 fim_endereco = '.htm'
 
 todos_anuncios = []
 anuncios_por_cidade = {}
 cidades = []
-
 
 # criando listas de paginas contendo os anuncios por cidade e unindo-as em uma coleção
 for pagina_principal in webpages_alquiler:
@@ -34,12 +45,13 @@ for pagina_principal in webpages_alquiler:
     todos_anuncios.append(paginas_cidade)
     # permitindo acessar, fora do loop, as listas de paginas por cada cidade em separado
     anuncios_por_cidade.update({nome_cidade: paginas_cidade})
-
-print(todos_anuncios)
-d = {'NOME': cidades}
-df = pd.DataFrame(d)
-print(df)
-dict = {'INDICE':[], 'NOME':[]}
+    # print(paginas_cidade)
+# print(todos_anuncios)
+all_indices = []
+all_detalhes = []
+all_titulos = []
+all_precos = []
+dict = {}
 # Turn all this below into a function so I can use it to any address (in idealista, at least)
 def coletar_dados_organizados(endereco):
     # endereco = input('Insira o endereço completo da página')
@@ -50,40 +62,47 @@ def coletar_dados_organizados(endereco):
     for index, anuncio in enumerate(anuncios, start=1):
         #Bloco de string com todas as infos por anuncio:
         infos_completas_por_anuncio = anuncio.find('div', class_="item-info-container")
-        titulo = infos_completas_por_anuncio.find('a', class_="item-link")
-        print(f'\033[35;7m{index} - {titulo.get_text().strip()}\033[m')
+        titulo_decomp = infos_completas_por_anuncio.find('a', class_="item-link")
+        titulo = titulo_decomp.get_text().strip()
+
+        # print(f'\033[35;7m{index} - {titulo.get_text().strip()}\033[m')
         # UM A UM:
         detalhes = (anuncio.find('div', class_="item-detail-char")).get_text().strip()
-        preco = anuncio.find('span', class_="item-price h2-simulated")
-        preco_decomp = preco.get_text().split('€')
-        preco_numerico = float(preco_decomp[0].replace('.',''))
-        print(f'\033[33m€ {preco_numerico:.2f}\033[m')
-        print(detalhes)
-        dict['INDICE'] = index
-    print(dict)
+        preco_decomp = anuncio.find('span', class_="item-price h2-simulated").get_text().split('€')
+        preco = float(preco_decomp[0].replace('.',''))
+        # print(f'\033[33m€ {preco_numerico:.2f}\033[m')
+        # print(detalhes)
+        all_indices.append(index)
+        all_detalhes.append(detalhes)
+        all_titulos.append(titulo)
+        all_precos.append(preco)
+    ## Conferindo que todas as listas tem a mesma quantidade de itens:
+    # print(len(all_indices), len(all_detalhes), len(all_titulos), len(all_precos))
+    dict = {'INDICE': all_indices,
+            'NOME': all_titulos,
+            'PRECO': all_precos,
+            'DETALHES': all_detalhes
+            }
+    df = pd.DataFrame(dict)
+    df.to_excel('test7.xlsx')
+        # with pd.ExcelWriter('test1.xlsx') as writer:
+        #     df.to_excel(writer, sheet_name=cidades[0])
+
+        # df.to_excel(writer, sheet_name=cidades[1])
+        # df.to_excel(writer, sheet_name=cidades[2])
     # df_1 = pd.DataFrame(dict)
     # df_1.to_excel('df_1.xlsx')
     # os.startfile('df_1.xlsx')
-
 # coletando todas as páginas de todas as cidades.
-for endereco in webpages_alquiler:
-    coletar_dados_organizados(endereco)
+# for endereco in webpages_alquiler:
+#     coletar_dados_organizados(endereco)
+print(all_indices)
 
-# for p in todos_anuncios:
-#     for item in p:
-#         coletar_dados_organizados(item)
-#
-# df.to_excel('test.xlsx', sheet_name=cidades[0])
-# df1 = df.copy()
-# os.startfile('test.xlsx')
-# with pd.ExcelWriter('test.xlsx') as writer:
-#     df.to_excel(writer, sheet_name=cidades[0])
-#     df1.to_excel(writer, sheet_name=cidades[1])
-#     df1.to_excel(writer, sheet_name=cidades[2])
-
-
-
-
+for p in todos_anuncios:
+    for item in p:
+        print(item)
+        coletar_dados_organizados(item)
+# os.startfile('test1.xlsx')
 # Funçâo para coletar apenas textos dos objetos bs4 (não foi necessária a partir de quando se descobriu o item certo que
 # armazena cada anuncio. A ideia era coletar separadamente as listas de precos, titulos, area e depois referencia-las
 # de novo a seus respectivos anuncios a partir de seus indices em comum.
