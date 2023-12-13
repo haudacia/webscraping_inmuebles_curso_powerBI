@@ -15,7 +15,6 @@ webpages_alquiler = [inicio_endereco_1, inicio_endereco_2, inicio_endereco_3]
 quant_paginas = 3 #melhorar
 fim_endereco = '.htm'
 
-todos_anuncios = []
 anuncios_por_cidade = {}
 cidades = []
 
@@ -28,11 +27,9 @@ for pagina_principal in webpages_alquiler:
     for i in range(2,quant_paginas):
         endereco_completo = pagina_principal + f'pagina-{i}' + fim_endereco
         paginas_cidade.append(endereco_completo)
-    todos_anuncios.append(paginas_cidade)
     # permitindo acessar, fora do loop, as listas de paginas por cada cidade em separado
     anuncios_por_cidade.update({nome_cidade: paginas_cidade})
-    # print(paginas_cidade)
-# print(todos_anuncios)
+print(anuncios_por_cidade)
 all_indices = []
 all_titulos = []
 all_precos = []
@@ -43,6 +40,38 @@ all_pavtos = []
 all_zonas = []
 all_ciudades = []
 dict = {}
+
+def dados_por_cidade(endereco):
+    scraper = cloudscraper.create_scraper()
+    html = scraper.get(endereco).content
+    soup1 = BeautifulSoup(html, 'html.parser')
+    anuncios = soup1.find_all('article', class_="item")
+
+
+    dict_1 = {'INDICE': all_indices,
+            'CIUDAD': all_ciudades,
+            'TITULO': all_titulos,
+            'TIPO IMOVEL': all_tipos,
+            'ZONA': all_zonas,
+            'AREA': all_areas,
+            'PRECO': all_precos,
+            'HAB': all_quan_habitaciones,
+            'PAVTO': all_pavtos
+            }
+
+
+    df_1 = pd.DataFrame(dict_1)
+    df_2 = pd.DataFrame()
+    df_3 = pd.DataFrame()
+    df.to_excel('anuncios_alquiler_espanha0.xlsx')
+    with pd.ExcelWriter('anuncios_alquiler_espanha.xlsx') as writer:
+        df_1.to_excel(writer, sheet_name='A')
+        df_2.to_excel(writer, sheet_name='B')
+        df_3.to_excel(writer, sheet_name='C')
+
+
+
+
 # Turn all this below into a function so I can use it to any address (in idealista, at least)
 def coletar_dados_organizados(endereco):
     # endereco = input('Insira o endereço completo da página')
@@ -95,30 +124,21 @@ def coletar_dados_organizados(endereco):
             'PAVTO': all_pavtos
             }
     df = pd.DataFrame(dict)
-    # df_madrid =
-    # df_cordoba =
+    df_ciudad1 = pd.DataFrame()
+    df_ciudad2 = pd.DataFrame()
+    df_ciudad3 = pd.DataFrame()
     df.to_excel('anuncios_alquiler_espanha0.xlsx')
         # with pd.ExcelWriter('anuncios_alquiler_espanha.xlsx') as writer:
         #     df.to_excel(writer, sheet_name=cidades[0])
 
         # df.to_excel(writer, sheet_name=cidades[1])
         # df.to_excel(writer, sheet_name=cidades[2])
-    # df_1 = pd.DataFrame(dict)
-    # df_1.to_excel('df_1.xlsx')
-    # os.startfile('df_1.xlsx')
-# coletando todas as páginas de todas as cidades.
-# for endereco in webpages_alquiler:
-#     coletar_dados_organizados(endereco)
-for p in todos_anuncios:
-    for item in p:
-        coletar_dados_organizados(item)
 
-os.startfile('anuncios_alquiler_espanha0.xlsx')
-
-# os.startfile('test1.xlsx')
-# Funçâo para coletar apenas textos dos objetos bs4 (não foi necessária a partir de quando se descobriu o item certo que
-# armazena cada anuncio. A ideia era coletar separadamente as listas de precos, titulos, area e depois referencia-las
-# de novo a seus respectivos anuncios a partir de seus indices em comum.
+# for k,v in anuncios_por_cidade.items():
+#     for item in v:
+#         coletar_dados_organizados(item)
+#
+# os.startfile('anuncios_alquiler_espanha0.xlsx')
 
 def coletar_textos(soup_iteravel):
     lista_textos = []
