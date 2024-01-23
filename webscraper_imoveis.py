@@ -48,6 +48,43 @@ def dados_por_cidade(endereco):
     anuncios = soup1.find_all('article', class_="item")
 
 
+
+    for index, anuncio in enumerate(anuncios, start=1):
+        #Bloco de string com todas as infos por anuncio:
+        infos_completas_por_anuncio = anuncio.find('div', class_="item-info-container")
+        titulo_decomp = infos_completas_por_anuncio.find('a', class_="item-link")
+        titulo = titulo_decomp.get_text().strip()
+        tipo = titulo.split()[0]
+        # Separando as informaçoes dadas em forma de texto corrido (str) no html:
+        infos_lista = (anuncio.find('div', class_="item-detail-char")).get_text().split()
+        try:
+            habitaciones = infos_lista[infos_lista.index('hab.')-1]
+            pavto = infos_lista[5]
+        except:
+            pavto = ''
+            habitaciones = ''
+            pass
+        preco_decomp = anuncio.find('span', class_="item-price h2-simulated").get_text().split('€')
+        preco = float(preco_decomp[0].replace('.',''))
+        area = infos_lista[infos_lista.index('m²') - 1]
+        zona = titulo.split(',')[-2] # penultimo item se refere ao bairro ou zona
+        ciudad = titulo.split(',')[-1] # ultimo item se refere à cidade
+        # print(f'\033[33m€ {preco_numerico:.2f}\033[m')
+        # print(detalhes)
+        # all_quan_quartos.append(detalhes)
+        all_indices.append(index)
+        all_titulos.append(titulo)
+        all_precos.append(preco)
+        all_quan_habitaciones.append(habitaciones)
+        all_areas.append(area)
+        all_tipos.append(tipo)
+        all_pavtos.append(pavto)
+        all_zonas.append(zona)
+        all_ciudades.append(ciudad)
+
+
+# inserir aqui filtro pra alocar cada info de anuncio a cidade respectiva.
+
     dict_1 = {'INDICE': all_indices,
             'CIUDAD': all_ciudades,
             'TITULO': all_titulos,
@@ -58,7 +95,6 @@ def dados_por_cidade(endereco):
             'HAB': all_quan_habitaciones,
             'PAVTO': all_pavtos
             }
-
 
     df_1 = pd.DataFrame(dict_1)
     df_2 = pd.DataFrame()
